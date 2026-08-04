@@ -1,0 +1,76 @@
+:root {
+  --ink-strong: #192112;
+  --ink-muted: #596052;
+  --ink-subtle: #7d8375;
+  --leaf: #3f681c;
+  --banana: #f4c430;
+  --banana-deep: #c99600;
+  --banana-soft: #fff1a8;
+  --surface: #fffdf4;
+  --line: rgba(36, 46, 28, 0.14);
+  --font-display: 'Avenir Next', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-body: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-functional: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+
+  color: var(--ink-strong);
+  background: var(--surface);
+  font-family: var(--font-body);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 80% 18%, rgba(244, 196, 48, 0.14), transparent 24rem), var(--surface);
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid rgba(63, 104, 28, 0.34);
+  outline-offset: 4px;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.page-container {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+@media (max-width: 720px) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .page-container {
+    width: min(100% - 32px, 1180px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
