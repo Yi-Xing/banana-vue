@@ -29,3 +29,7 @@ pnpm build
 ```
 
 `pnpm lint` 会自动修复文件，运行后检查额外差异。涉及交互、路由或上传下载流程时，再使用 `pnpm dev` 做对应场景验证。
+
+## Git 提交
+
+- 生成 Git commit message 时必须使用中文说明，不得使用纯英文；如采用 Conventional Commits，可保留 `feat:`、`fix:` 等类型前缀，但正文必须为中文。
