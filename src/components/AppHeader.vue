@@ -1,7 +1,39 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 import bananaLogo from '@/assets/banana-logo.webp'
+import { ApiError } from '@/api/sso'
+import { beginSsoLogin, logoutCurrentSession } from '@/services/auth'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
+const isLoggingOut = ref(false)
+
+async function handleLogout(): Promise<void> {
+  const accessToken = authStore.getValidAccessToken()
+  if (!accessToken || isLoggingOut.value) return
+
+  isLoggingOut.value = true
+  try {
+    await logoutCurrentSession(accessToken)
+    authStore.clearSession()
+    ElMessage.success('已退出所有关联登录会话')
+    beginSsoLogin('/')
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) {
+      authStore.clearSession()
+      ElMessage.warning('登录会话已失效，请重新登录')
+      beginSsoLogin('/')
+      return
+    }
+
+    ElMessage.error(error instanceof Error ? error.message : '退出登录失败')
+  } finally {
+    isLoggingOut.value = false
+  }
+}
 </script>
 
 <template>
@@ -19,7 +51,9 @@ import bananaLogo from '@/assets/banana-logo.webp'
         <a href="#structure">目录结构</a>
       </nav>
 
-      <a class="header-action" href="#start">开始使用</a>
+      <button class="header-action" type="button" :disabled="isLoggingOut" @click="handleLogout">
+        {{ isLoggingOut ? '正在退出…' : '退出登录' }}
+      </button>
     </div>
   </header>
 </template>
@@ -92,12 +126,22 @@ import bananaLogo from '@/assets/banana-logo.webp'
 
 .header-action {
   justify-self: end;
+  padding: 0;
+  border: 0;
   border-bottom: 2px solid var(--banana-deep);
+  background: transparent;
   color: var(--ink-strong);
+  cursor: pointer;
+  font-family: inherit;
   font-size: 14px;
   font-weight: 700;
   line-height: 30px;
   text-decoration: none;
+}
+
+.header-action:disabled {
+  cursor: wait;
+  opacity: 0.58;
 }
 
 @media (max-width: 720px) {

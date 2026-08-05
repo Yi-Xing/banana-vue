@@ -79,7 +79,7 @@ const projectTree = [
               <p class="eyebrow">Project foundation</p>
               <h2>只保留必要的能力</h2>
             </div>
-            <p>首页之外没有登录、权限、接口或管理后台。工程边界干净，下一步由真实需求决定。</p>
+            <p>已接入统一登录、回调换取凭证与全局退出，其他业务能力继续按真实需求扩展。</p>
           </div>
 
           <div class="foundation-grid">
