@@ -17,9 +17,10 @@ export default defineConfig(({ mode }) => {
     server: {
       host: '0.0.0.0',
       port: Number(env.BANANA_DEV_PORT || 5173),
+      allowedHosts: ['banana.fblue.top'],
       proxy: {
         '/api': {
-          target: env.BANANA_API_PROXY_TARGET || 'http://localhost:8081',
+          target: env.BANANA_API_PROXY_TARGET || 'http://banana.fblue.top:8081',
           changeOrigin: true,
         },
       },

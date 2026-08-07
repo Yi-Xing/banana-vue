@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
 import bananaLogo from '@/assets/banana-logo.webp'
-import { ApiError } from '@/api/sso'
-import { beginSsoLogin, logoutCurrentSession } from '@/services/auth'
+import { ApiError } from '@/api/http'
+import { PAGE_PERMISSIONS } from '@/constants/permissionCode'
+import { logoutCurrentSession } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
+import { usePermissionStore } from '@/stores/permission'
 
 const authStore = useAuthStore()
+const permissionStore = usePermissionStore()
+const router = useRouter()
 const isLoggingOut = ref(false)
 
 async function handleLogout(): Promise<void> {
@@ -19,13 +23,15 @@ async function handleLogout(): Promise<void> {
   try {
     await logoutCurrentSession(accessToken)
     authStore.clearSession()
+    permissionStore.clear()
     ElMessage.success('已退出所有关联登录会话')
-    beginSsoLogin('/')
+    await router.push('/')
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
       authStore.clearSession()
+      permissionStore.clear()
       ElMessage.warning('登录会话已失效，请重新登录')
-      beginSsoLogin('/')
+      await router.push('/')
       return
     }
 
@@ -47,8 +53,14 @@ async function handleLogout(): Promise<void> {
       </RouterLink>
 
       <nav class="main-nav" aria-label="主导航">
-        <a href="#foundation">项目基础</a>
-        <a href="#structure">目录结构</a>
+        <RouterLink to="/workspace#foundation">项目基础</RouterLink>
+        <RouterLink to="/workspace#structure">目录结构</RouterLink>
+        <RouterLink
+          v-if="permissionStore.hasPagePermission(PAGE_PERMISSIONS.ADMIN_OSS)"
+          to="/admin/oss"
+        >
+          OSS 管理
+        </RouterLink>
       </nav>
 
       <button class="header-action" type="button" :disabled="isLoggingOut" @click="handleLogout">

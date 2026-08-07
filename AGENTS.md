@@ -21,6 +21,7 @@
 
 - 环境地址集中从配置层或 `import.meta.env` 读取；`VITE_*` 只能保存公开配置。
 - 不提交密码、密钥、令牌、Cookie、对象存储凭证、真实服务地址或个人信息；本地配置使用被忽略的 `.env.local`。
+- 本地启动和浏览器联调必须使用 `http://banana.fblue.top:5173`，API 通过 `http://banana.fblue.top:8081`；Watermelon 登录入口使用 `http://watermelon.fblue.top:3000`。测试前确认两个域名均在 hosts 中解析到 `127.0.0.1`，不得用 `localhost` 替代。
 - 修改后至少运行：
 
 ```bash

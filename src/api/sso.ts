@@ -1,20 +1,5 @@
-import { envConfig } from '@/config/env'
-import type { ApiResponse } from '@/types/api'
+import { readApiData, resolveApiUrl } from '@/api/http'
 import type { SsoTokenData } from '@/types/auth'
-
-export class ApiError extends Error {
-  constructor(
-    message: string,
-    readonly status: number,
-  ) {
-    super(message)
-    this.name = 'ApiError'
-  }
-}
-
-function resolveApiUrl(path: string): string {
-  return envConfig.apiBaseUrl ? `${envConfig.apiBaseUrl}${path}` : path
-}
 
 export function createSsoLoginUrl(returnPath: string): string {
   const url = new URL(resolveApiUrl('/api/sso/login'), window.location.origin)
@@ -47,20 +32,4 @@ export async function logoutSso(accessToken: string): Promise<void> {
   })
 
   await readApiData<null>(response, '退出登录失败')
-}
-
-async function readApiData<T>(response: Response, fallbackMessage: string): Promise<T> {
-  let payload: ApiResponse<T> | null = null
-
-  try {
-    payload = (await response.json()) as ApiResponse<T>
-  } catch {
-    // 非 JSON 错误响应交由下方统一处理。
-  }
-
-  if (!response.ok || !payload?.success) {
-    throw new ApiError(payload?.message || fallbackMessage, response.status)
-  }
-
-  return payload.data
 }
