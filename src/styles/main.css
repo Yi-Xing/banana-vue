@@ -1,38 +1,57 @@
 :root {
-  --ink-strong: #303133;
-  --ink-muted: #606266;
-  --ink-subtle: #909399;
-  --brand: #409eff;
-  --brand-deep: #337ecc;
-  --banana: #e4b947;
-  --banana-deep: #a97a16;
-  --banana-soft: #f8e9b7;
-  --banana-pale: #fff9e9;
+  --ink-strong: #344238;
+  --ink-muted: #526057;
+  --ink-subtle: #7d897f;
+  --brand: #d6a800;
+  --brand-deep: #8a7414;
+  --banana: #facc15;
+  --banana-deep: #8a7414;
+  --banana-soft: #fff2b8;
+  --banana-pale: #fff9df;
+  --banana-button-text: #453a10;
+  --banana-button-border: #e9d36a;
+  --button-default-bg: #fffdf7;
+  --button-default-border: #d9ded4;
+  --button-success-bg: #e8f4ea;
+  --button-success-border: #bbd8c1;
+  --button-success-text: #356742;
+  --button-warning-bg: #fff0d6;
+  --button-warning-border: #e8c789;
+  --button-warning-text: #805513;
+  --button-danger-bg: #fde9e7;
+  --button-danger-border: #edb9b5;
+  --button-danger-text: #a33b34;
+  --button-info-bg: #edf1ee;
+  --button-info-border: #ced7d0;
+  --button-info-text: #4b5c53;
   --surface: #ffffff;
-  --surface-page: #f5f7fa;
-  --line: rgba(48, 49, 51, 0.12);
-  --shadow-soft: 0 6px 20px rgba(48, 49, 51, 0.08);
+  --surface-page: #f8faf5;
+  --sidebar-bg: #f2f4ea;
+  --sidebar-divider: #dde3d1;
+  --sidebar-brand-text: #344238;
+  --line: rgba(52, 66, 56, 0.12);
+  --shadow-soft: 0 6px 20px rgba(52, 66, 56, 0.08);
   --font-display: 'Avenir Next', 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --font-body: 'PingFang SC', 'Microsoft YaHei', sans-serif;
   --font-functional: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
 
-  --el-color-primary: #409eff;
-  --el-color-primary-light-3: #79bbff;
-  --el-color-primary-light-5: #a0cfff;
-  --el-color-primary-light-7: #c6e2ff;
-  --el-color-primary-light-8: #d9ecff;
-  --el-color-primary-light-9: #ecf5ff;
-  --el-color-primary-dark-2: #337ecc;
+  --el-color-primary: #d6a800;
+  --el-color-primary-light-3: #e2c34d;
+  --el-color-primary-light-5: #ead477;
+  --el-color-primary-light-7: #f4e6a7;
+  --el-color-primary-light-8: #f8edc0;
+  --el-color-primary-light-9: #fff2b8;
+  --el-color-primary-dark-2: #8a7414;
   --el-color-success: #67c23a;
   --el-color-warning: #e6a23c;
   --el-color-danger: #f56c6c;
   --el-color-info: #909399;
   --el-bg-color-page: var(--surface-page);
-  --el-border-color: #dcdfe6;
-  --el-border-color-light: #e4e7ed;
-  --el-border-color-lighter: #ebeef5;
-  --el-fill-color-light: #f5f7fa;
-  --el-fill-color-lighter: #fafafa;
+  --el-border-color: #d9ded4;
+  --el-border-color-light: #e1e6dc;
+  --el-border-color-lighter: #e9ede6;
+  --el-fill-color-light: #f2f4ea;
+  --el-fill-color-lighter: #f8faf5;
   --el-text-color-primary: var(--ink-strong);
   --el-text-color-regular: var(--ink-muted);
 
@@ -127,14 +146,14 @@ body {
 }
 
 .content-card .el-table {
-  --el-table-header-bg-color: #f6f8f7;
+  --el-table-header-bg-color: #f6f8f2;
   --el-table-row-hover-bg-color: var(--banana-pale);
   --el-table-border-color: var(--el-border-color-lighter);
 }
 
 .content-card .el-table th.el-table__cell {
   height: 48px;
-  color: #59676c;
+  color: #526057;
   font-weight: 650;
 }
 
@@ -161,7 +180,111 @@ body {
 
 .el-pagination {
   --el-pagination-button-bg-color: transparent;
-  --el-pagination-hover-color: var(--el-color-primary);
+  --el-pagination-hover-color: var(--brand-deep);
+}
+
+.el-pagination .el-pager li.is-active {
+  background-color: #fff2b8;
+  color: var(--banana-button-text);
+}
+
+.el-button--primary:not(.is-link):not(.is-text) {
+  --el-button-text-color: var(--banana-button-text);
+  --el-button-bg-color: #fff2b8;
+  --el-button-border-color: var(--banana-button-border);
+  --el-button-hover-text-color: var(--banana-button-text);
+  --el-button-hover-bg-color: #fbe99a;
+  --el-button-hover-border-color: #dcc04f;
+  --el-button-active-text-color: var(--banana-button-text);
+  --el-button-active-bg-color: #f4db72;
+  --el-button-active-border-color: var(--brand);
+  --el-button-disabled-text-color: #8b8358;
+  --el-button-disabled-bg-color: #fff8d9;
+  --el-button-disabled-border-color: #eee2ad;
+}
+
+.el-button--primary.is-link,
+.el-button--primary.is-text {
+  --el-button-text-color: var(--brand-deep);
+  --el-button-hover-text-color: #6d5b10;
+  --el-button-active-text-color: #57490d;
+}
+
+.el-button--success:not(.is-link):not(.is-text) {
+  --el-button-text-color: var(--button-success-text);
+  --el-button-bg-color: var(--button-success-bg);
+  --el-button-border-color: var(--button-success-border);
+  --el-button-hover-text-color: #284e32;
+  --el-button-hover-bg-color: #d9ecdd;
+  --el-button-hover-border-color: #96c3a0;
+  --el-button-active-text-color: #23442c;
+  --el-button-active-bg-color: #c8e3cf;
+  --el-button-active-border-color: #73ad80;
+  --el-button-disabled-text-color: #78917e;
+  --el-button-disabled-bg-color: #f2f7f3;
+  --el-button-disabled-border-color: #dce9df;
+}
+
+.el-button--warning:not(.is-link):not(.is-text) {
+  --el-button-text-color: var(--button-warning-text);
+  --el-button-bg-color: var(--button-warning-bg);
+  --el-button-border-color: var(--button-warning-border);
+  --el-button-hover-text-color: #68430d;
+  --el-button-hover-bg-color: #fbe3b7;
+  --el-button-hover-border-color: #dcae59;
+  --el-button-active-text-color: #58380b;
+  --el-button-active-bg-color: #f4d293;
+  --el-button-active-border-color: #c99537;
+  --el-button-disabled-text-color: #a58a60;
+  --el-button-disabled-bg-color: #fff7e9;
+  --el-button-disabled-border-color: #f0dfbd;
+}
+
+.el-button--danger:not(.is-link):not(.is-text) {
+  --el-button-text-color: var(--button-danger-text);
+  --el-button-bg-color: var(--button-danger-bg);
+  --el-button-border-color: var(--button-danger-border);
+  --el-button-hover-text-color: #87302a;
+  --el-button-hover-bg-color: #f9d8d5;
+  --el-button-hover-border-color: #df938d;
+  --el-button-active-text-color: #732823;
+  --el-button-active-bg-color: #f2c3bf;
+  --el-button-active-border-color: #d7756d;
+  --el-button-disabled-text-color: #ad7b77;
+  --el-button-disabled-bg-color: #fdf3f2;
+  --el-button-disabled-border-color: #f1d8d5;
+}
+
+.el-button--info:not(.is-link):not(.is-text) {
+  --el-button-text-color: var(--button-info-text);
+  --el-button-bg-color: var(--button-info-bg);
+  --el-button-border-color: var(--button-info-border);
+  --el-button-hover-text-color: #39473f;
+  --el-button-hover-bg-color: #dfe6e1;
+  --el-button-hover-border-color: #afbeb3;
+  --el-button-active-text-color: #303c35;
+  --el-button-active-bg-color: #d1dbd4;
+  --el-button-active-border-color: #93a69a;
+  --el-button-disabled-text-color: #829087;
+  --el-button-disabled-bg-color: #f4f6f4;
+  --el-button-disabled-border-color: #dfe5e1;
+}
+
+.el-button:not(.el-button--primary):not(.el-button--success):not(.el-button--warning):not(
+    .el-button--danger
+  ):not(.el-button--info):not(.is-link):not(.is-text) {
+  --el-button-text-color: var(--ink-muted);
+  --el-button-bg-color: var(--button-default-bg);
+  --el-button-border-color: var(--button-default-border);
+  --el-button-hover-text-color: var(--ink-strong);
+  --el-button-hover-bg-color: #f2f4ea;
+  --el-button-hover-border-color: #c7d0c0;
+  --el-button-active-text-color: var(--ink-strong);
+  --el-button-active-bg-color: #e8ecd9;
+  --el-button-active-border-color: #aebba5;
+  --el-button-disabled-text-color: #9aa29c;
+  --el-button-disabled-bg-color: #f8f9f6;
+  --el-button-disabled-border-color: #e4e8e1;
 }
 
 .el-dialog {

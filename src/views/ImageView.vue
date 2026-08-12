@@ -189,7 +189,7 @@ onMounted(async () => {
 .image-card:hover {
   transform: translateY(-2px);
   border-color: var(--el-color-primary-light-7);
-  box-shadow: 0 12px 28px rgba(51, 76, 105, 0.1);
+  box-shadow: 0 12px 28px rgba(52, 66, 56, 0.1);
 }
 .image-card :deep(.el-image) {
   width: 100%;

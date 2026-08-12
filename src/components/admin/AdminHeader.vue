@@ -105,9 +105,9 @@ async function logout(): Promise<void> {
   width: 100%;
   height: 60px !important;
   padding: 0;
-  border-bottom: 1px solid var(--el-border-color-light);
-  background: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--sidebar-divider);
+  background: var(--surface);
+  box-shadow: 0 2px 4px rgba(52, 66, 56, 0.08);
 }
 
 .header-content {
@@ -140,7 +140,7 @@ async function logout(): Promise<void> {
 
 .logo {
   margin: 0;
-  color: var(--el-color-primary);
+  color: var(--sidebar-brand-text);
   font-size: 20px;
   font-weight: 700;
 }

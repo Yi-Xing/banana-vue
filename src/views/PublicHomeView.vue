@@ -203,7 +203,7 @@ h1 span {
   height: min(440px, calc(100dvh - 190px));
   min-height: 360px;
   padding: 30px;
-  border: 1px solid rgba(88, 125, 165, 0.16);
+  border: 1px solid rgba(52, 66, 56, 0.16);
   border-radius: 46% 54% 42% 58% / 54% 40% 60% 46%;
   background: linear-gradient(145deg, var(--banana-pale), var(--el-color-primary-light-9));
   transform: rotate(1.5deg);

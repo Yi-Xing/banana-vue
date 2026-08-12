@@ -84,12 +84,16 @@ function toggleCollapse(): void {
   top: 60px;
   height: calc(100vh - 60px);
   overflow: hidden;
-  border-right: 1px solid var(--el-border-color-light);
-  background: #fff;
+  border-right: 1px solid var(--sidebar-divider);
+  background: var(--sidebar-bg);
   transition: width 0.3s ease;
 }
 
 .el-menu {
+  --el-menu-active-color: var(--banana-button-text);
+  --el-menu-bg-color: var(--sidebar-bg);
+  --el-menu-hover-bg-color: #e8ecd9;
+  --el-menu-text-color: var(--ink-muted);
   height: 100%;
   border-right: 0;
 }
@@ -99,8 +103,8 @@ function toggleCollapse(): void {
 }
 
 .el-menu-item.is-active {
-  background: transparent;
-  color: var(--el-color-primary);
+  background: var(--banana-soft);
+  color: var(--banana-button-text);
 }
 
 .el-menu-item .el-icon {
@@ -117,9 +121,9 @@ function toggleCollapse(): void {
   height: 30px;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--el-border-color);
+  border: 1px solid var(--sidebar-divider);
   border-radius: 50%;
-  background: #fff;
+  background: var(--sidebar-bg);
   color: var(--ink-muted);
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -127,8 +131,8 @@ function toggleCollapse(): void {
 }
 
 .collapse-button:hover {
-  border-color: var(--el-border-color-dark);
-  background: var(--el-fill-color-light);
+  border-color: var(--banana-button-border);
+  background: var(--banana-soft);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
