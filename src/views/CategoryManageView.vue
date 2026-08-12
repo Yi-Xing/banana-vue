@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
 import { createCategory, deleteCategory, listCategories, updateCategory } from '@/api/category'
 import { BUTTON_PERMISSIONS } from '@/constants/permissionCode'
 import type { Category, CategoryPayload } from '@/types/file'
@@ -88,12 +89,16 @@ onMounted(load)
         <h1>分类管理</h1>
         <span>分类 code 可修改；系统默认分类固定为 default。</span>
       </div>
-      <el-button v-permission="BUTTON_PERMISSIONS.CATEGORY_ADD" type="primary" @click="openCreate"
+      <el-button
+        v-permission="BUTTON_PERMISSIONS.CATEGORY_ADD"
+        type="primary"
+        :icon="Plus"
+        @click="openCreate"
         >新增分类</el-button
       >
     </header>
     <el-card class="content-card"
-      ><el-table v-loading="loading" :data="rows"
+      ><el-table v-loading="loading" :data="rows" stripe
         ><el-table-column prop="name" label="名称" min-width="150"
           ><template #default="{ row }"
             ><b>{{ row.name }}</b
@@ -120,20 +125,22 @@ onMounted(load)
           show-overflow-tooltip
         /><el-table-column label="操作" width="150" fixed="right"
           ><template #default="{ row }"
-            ><el-button
-              v-permission="BUTTON_PERMISSIONS.CATEGORY_UPDATE"
-              link
-              type="primary"
-              @click="openEdit(row)"
-              >编辑</el-button
-            ><el-button
-              v-if="!row.defaultCategory"
-              v-permission="BUTTON_PERMISSIONS.CATEGORY_DELETE"
-              link
-              type="danger"
-              @click="remove(row)"
-              >删除</el-button
-            ></template
+            ><div class="table-actions">
+              <el-button
+                v-permission="BUTTON_PERMISSIONS.CATEGORY_UPDATE"
+                type="primary"
+                size="small"
+                @click="openEdit(row)"
+                >编辑</el-button
+              ><el-button
+                v-if="!row.defaultCategory"
+                v-permission="BUTTON_PERMISSIONS.CATEGORY_DELETE"
+                type="danger"
+                size="small"
+                @click="remove(row)"
+                >删除</el-button
+              >
+            </div></template
           ></el-table-column
         ></el-table
       ></el-card

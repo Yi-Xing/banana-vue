@@ -4,7 +4,7 @@
     <h1>暂无页面访问权限</h1>
     <p>权限可能刚刚发生变化，请联系管理员在用户中心配置 Banana 页面权限。</p>
     <div class="actions">
-      <RouterLink class="primary-action" to="/workspace">重新检查权限</RouterLink>
+      <RouterLink class="primary-action" to="/admin/dashboard">重新检查权限</RouterLink>
       <RouterLink class="secondary-action" to="/">返回公开首页</RouterLink>
     </div>
   </main>

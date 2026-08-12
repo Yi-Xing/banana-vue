@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
 import { createOss, deleteOss, listOss, testOss, testSavedOss, updateOss } from '@/api/oss'
 import { BUTTON_PERMISSIONS } from '@/constants/permissionCode'
 import type { OssConfig, OssPayload } from '@/types/file'
@@ -151,12 +152,16 @@ onMounted(load)
         <h1>OSS 管理</h1>
         <span>统一配置本地、阿里云、七牛云和 S3 兼容存储；code 为 default 时作为默认 OSS。</span>
       </div>
-      <el-button v-permission="BUTTON_PERMISSIONS.OSS_ADD" type="primary" @click="openCreate"
+      <el-button
+        v-permission="BUTTON_PERMISSIONS.OSS_ADD"
+        type="primary"
+        :icon="Plus"
+        @click="openCreate"
         >新增 OSS</el-button
       >
     </header>
     <el-card class="content-card"
-      ><el-table v-loading="loading" :data="rows"
+      ><el-table v-loading="loading" :data="rows" stripe
         ><el-table-column label="名称 / Code" min-width="190"
           ><template #default="{ row }"
             ><b>{{ row.name }}</b>
@@ -191,22 +196,27 @@ onMounted(load)
           }}</template></el-table-column
         ><el-table-column label="操作" width="205" fixed="right"
           ><template #default="{ row }"
-            ><el-button v-permission="BUTTON_PERMISSIONS.OSS_TEST" link @click="testRow(row)"
-              >测试</el-button
-            ><el-button
-              v-permission="BUTTON_PERMISSIONS.OSS_UPDATE"
-              link
-              type="primary"
-              @click="openEdit(row)"
-              >编辑</el-button
-            ><el-button
-              v-if="row.code !== 'default'"
-              v-permission="BUTTON_PERMISSIONS.OSS_DELETE"
-              link
-              type="danger"
-              @click="remove(row)"
-              >删除</el-button
-            ></template
+            ><div class="table-actions">
+              <el-button
+                v-permission="BUTTON_PERMISSIONS.OSS_TEST"
+                size="small"
+                @click="testRow(row)"
+                >测试</el-button
+              ><el-button
+                v-permission="BUTTON_PERMISSIONS.OSS_UPDATE"
+                type="primary"
+                size="small"
+                @click="openEdit(row)"
+                >编辑</el-button
+              ><el-button
+                v-if="row.code !== 'default'"
+                v-permission="BUTTON_PERMISSIONS.OSS_DELETE"
+                type="danger"
+                size="small"
+                @click="remove(row)"
+                >删除</el-button
+              >
+            </div></template
           ></el-table-column
         ></el-table
       ></el-card
@@ -226,7 +236,9 @@ onMounted(load)
               show-word-limit
               placeholder="小写字母、数字、_、-，最长254个字符"
             />
-            <div class="hint">RPC 外部系统通过 code 定位；值为 default 时作为默认 OSS</div></el-form-item
+            <div class="hint">
+              RPC 外部系统通过 code 定位；值为 default 时作为默认 OSS
+            </div></el-form-item
           ><el-form-item label="类型"
             ><el-select v-model="form.type"
               ><el-option label="本地存储" :value="OSS_TYPE.LOCAL" /><el-option
@@ -248,7 +260,9 @@ onMounted(load)
           ><el-form-item :label="isLocalStorage ? '本地目录名' : 'Bucket'"
             ><el-input
               v-model="form.bucket"
-              :placeholder="isLocalStorage ? '例如 files，仅作为本地根目录下的子目录' : '存储空间名称'"
+              :placeholder="
+                isLocalStorage ? '例如 files，仅作为本地根目录下的子目录' : '存储空间名称'
+              "
             />
             <div v-if="isLocalStorage" class="hint">
               仅支持字母、数字、点、下划线和中划线，不可填写服务器绝对路径
@@ -258,8 +272,9 @@ onMounted(load)
           ><el-form-item label="Public Domain"
             ><el-input
               v-model="form.publicDomain"
-              :placeholder="isLocalStorage ? '可选，留空使用 Banana 本地文件访问路径' : '公开域名或七牛下载域名'"
-            /></el-form-item
+              :placeholder="
+                isLocalStorage ? '可选，留空使用 Banana 本地文件访问路径' : '公开域名或七牛下载域名'
+              " /></el-form-item
           ><el-form-item label="状态"
             ><el-select v-model="form.state"
               ><el-option label="启用" :value="1" /><el-option

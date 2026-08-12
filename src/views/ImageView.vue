@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 import { listCategories } from '@/api/category'
 import { listImages } from '@/api/image'
 import { getFileAccessUrl } from '@/api/file'
@@ -70,6 +71,13 @@ function reset(): void {
   })
   void load()
 }
+function handlePageSizeChange(): void {
+  query.pageNum = 1
+  void load()
+}
+function handleCurrentPageChange(): void {
+  void load()
+}
 onMounted(async () => {
   try {
     categories.value = await listCategories(1)
@@ -119,8 +127,8 @@ onMounted(async () => {
         ><el-option label="RGB" value="RGB" /><el-option label="GRAY" value="GRAY" /><el-option
           label="CMYK"
           value="CMYK" /></el-select
-      ><el-button type="primary" @click="applyFilters">筛选</el-button
-      ><el-button link @click="reset">重置</el-button>
+      ><el-button type="primary" :icon="Search" @click="applyFilters">筛选</el-button
+      ><el-button @click="reset">重置</el-button>
     </div>
     <div v-loading="loading" class="image-grid">
       <button
@@ -145,10 +153,13 @@ onMounted(async () => {
     <div class="pagination">
       <el-pagination
         v-model:current-page="query.pageNum"
-        :page-size="query.pageSize"
-        layout="total, prev, pager, next"
+        v-model:page-size="query.pageSize"
+        :page-sizes="[12, 24, 48, 96]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :pager-count="7"
         :total="total"
-        @change="load"
+        @size-change="handlePageSizeChange"
+        @current-change="handleCurrentPageChange"
       />
     </div>
     <FilePreviewDialog v-model="previewVisible" :file="previewFile" />
@@ -168,7 +179,7 @@ onMounted(async () => {
 .image-card {
   overflow: hidden;
   padding: 0;
-  border: 1px solid #e4e8df;
+  border: 1px solid var(--el-border-color-light);
   border-radius: 13px;
   background: #fff;
   cursor: pointer;
@@ -177,7 +188,8 @@ onMounted(async () => {
 }
 .image-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(35, 52, 27, 0.1);
+  border-color: var(--el-color-primary-light-7);
+  box-shadow: 0 12px 28px rgba(51, 76, 105, 0.1);
 }
 .image-card :deep(.el-image) {
   width: 100%;
@@ -187,8 +199,8 @@ onMounted(async () => {
   display: grid;
   height: 100%;
   place-items: center;
-  background: #edf1e9;
-  color: #8f9789;
+  background: var(--el-fill-color-light);
+  color: var(--ink-subtle);
 }
 .image-info {
   display: grid;
@@ -203,10 +215,5 @@ onMounted(async () => {
 .image-info span {
   color: #92998e;
   font-size: 12px;
-}
-.pagination {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
 }
 </style>

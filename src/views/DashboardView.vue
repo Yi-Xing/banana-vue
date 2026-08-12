@@ -14,7 +14,7 @@ async function load(): Promise<void> {
   try {
     summary.value = await getDashboardSummary()
   } catch (error) {
-    ElMessage.error(error instanceof Error ? error.message : '加载工作台失败')
+    ElMessage.error(error instanceof Error ? error.message : '加载仪表盘失败')
   } finally {
     loading.value = false
   }
@@ -23,14 +23,21 @@ onMounted(load)
 </script>
 
 <template>
-  <section class="management-page" v-loading="loading">
+  <section class="management-page">
     <header class="page-heading">
       <div>
         <p>Overview</p>
-        <h1>文件工作台</h1>
+        <h1>文件仪表盘</h1>
         <span>集中查看文件规模、存储用量和最近上传。</span>
       </div>
     </header>
+    <div
+      v-if="loading"
+      v-loading="loading"
+      class="dashboard-loading"
+      element-loading-background="transparent"
+      aria-label="正在加载仪表盘"
+    />
     <div v-if="summary" class="stat-grid">
       <el-card
         ><el-icon><Files /></el-icon><strong>{{ summary.availableFiles }}</strong
@@ -76,12 +83,37 @@ onMounted(load)
 </template>
 
 <style scoped>
+.dashboard-loading {
+  min-height: 260px;
+}
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   margin: 24px 0;
 }
+.stat-grid .el-card,
+.dashboard-grid .el-card {
+  border-color: var(--el-border-color-lighter);
+  box-shadow: var(--shadow-soft);
+}
+
+.stat-grid .el-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-grid .el-card::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--banana), var(--brand));
+  content: '';
+  opacity: 0.72;
+}
+
 .stat-grid :deep(.el-card__body) {
   display: grid;
   grid-template-columns: 46px 1fr;
@@ -93,15 +125,16 @@ onMounted(load)
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: #edf4e7;
-  color: #3e6a26;
+  border: 1px solid rgba(228, 185, 71, 0.24);
+  background: var(--banana-pale);
+  color: var(--brand);
   font-size: 22px;
 }
 .stat-grid strong {
   font-size: 25px;
 }
 .stat-grid span {
-  color: #8a9185;
+  color: var(--ink-subtle);
   font-size: 13px;
 }
 .dashboard-grid {
@@ -121,7 +154,7 @@ onMounted(load)
   gap: 18px;
 }
 .type-list span {
-  color: #6e756a;
+  color: var(--ink-muted);
 }
 .recent-list {
   display: grid;
@@ -131,9 +164,13 @@ onMounted(load)
   display: grid;
   gap: 4px;
 }
+.recent-list b {
+  font-size: 14px;
+  font-weight: 600;
+}
 .recent-list small,
 time {
-  color: #959b91;
+  color: var(--ink-subtle);
   font-size: 12px;
 }
 @media (max-width: 960px) {

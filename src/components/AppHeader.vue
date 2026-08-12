@@ -53,8 +53,8 @@ async function handleLogout(): Promise<void> {
       </RouterLink>
 
       <nav class="main-nav" aria-label="主导航">
-        <RouterLink to="/workspace#foundation">项目基础</RouterLink>
-        <RouterLink to="/workspace#structure">目录结构</RouterLink>
+        <RouterLink to="/admin/dashboard#foundation">项目基础</RouterLink>
+        <RouterLink to="/admin/dashboard#structure">目录结构</RouterLink>
         <RouterLink
           v-if="permissionStore.hasPagePermission(PAGE_PERMISSIONS.ADMIN_OSS)"
           to="/admin/oss"
@@ -75,8 +75,8 @@ async function handleLogout(): Promise<void> {
   position: sticky;
   z-index: 20;
   top: 0;
-  border-bottom: 1px solid rgba(28, 36, 21, 0.08);
-  background: rgba(255, 253, 244, 0.88);
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  background: rgba(255, 254, 250, 0.9);
   backdrop-filter: blur(18px);
 }
 
@@ -107,7 +107,7 @@ async function handleLogout(): Promise<void> {
   height: 36px;
   overflow: hidden;
   place-items: center;
-  border: 1px solid rgba(52, 61, 28, 0.1);
+  border: 1px solid rgba(213, 173, 43, 0.2);
   border-radius: 10px 4px 10px 4px;
   background: var(--banana-soft);
 }
@@ -133,7 +133,7 @@ async function handleLogout(): Promise<void> {
 }
 
 .main-nav a:hover {
-  color: var(--leaf);
+  color: var(--brand);
 }
 
 .header-action {

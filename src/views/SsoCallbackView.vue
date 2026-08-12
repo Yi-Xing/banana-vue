@@ -124,7 +124,7 @@ onMounted(handleCallback)
   width: 30px;
   height: 30px;
   border: 3px solid rgba(63, 104, 28, 0.18);
-  border-top-color: var(--leaf);
+  border-top-color: var(--brand);
   border-radius: 50%;
   animation: spin 800ms linear infinite;
 }

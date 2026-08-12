@@ -1,16 +1,31 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { DataBoard, Files, Picture, Box, Delete, CollectionTag } from '@element-plus/icons-vue'
+import {
+  ArrowLeftBold,
+  ArrowRightBold,
+  Box,
+  CollectionTag,
+  DataBoard,
+  Delete,
+  Files,
+  Picture,
+} from '@element-plus/icons-vue'
 
 import { PAGE_PERMISSIONS } from '@/constants/permissionCode'
 import { usePermissionStore } from '@/stores/permission'
 
 const route = useRoute()
 const permissions = usePermissionStore()
+const isCollapsed = ref(false)
 const active = computed(() => route.path)
 const menus = [
-  { path: '/workspace', label: '工作台', icon: DataBoard, permission: PAGE_PERMISSIONS.DASHBOARD },
+  {
+    path: '/admin/dashboard',
+    label: '仪表盘',
+    icon: DataBoard,
+    permission: PAGE_PERMISSIONS.ADMIN_DASHBOARD,
+  },
   { path: '/admin/files', label: '文件管理', icon: Files, permission: PAGE_PERMISSIONS.ADMIN_FILE },
   {
     path: '/admin/images',
@@ -32,57 +47,100 @@ const menus = [
     permission: PAGE_PERMISSIONS.ADMIN_RECYCLE,
   },
 ]
+const visibleMenus = computed(() =>
+  menus.filter((item) => permissions.hasPagePermission(item.permission)),
+)
+function toggleCollapse(): void {
+  isCollapsed.value = !isCollapsed.value
+}
 </script>
 
 <template>
-  <aside class="sidebar">
-    <nav>
-      <RouterLink
-        v-for="menu in menus.filter((item) => permissions.hasPagePermission(item.permission))"
-        :key="menu.path"
-        :to="menu.path"
-        :class="{ active: active === menu.path }"
-      >
-        <el-icon><component :is="menu.icon" /></el-icon><span>{{ menu.label }}</span>
-      </RouterLink>
-    </nav>
-  </aside>
+  <el-aside
+    class="sidebar"
+    :class="{ 'is-collapsed': isCollapsed }"
+    :width="isCollapsed ? '64px' : '250px'"
+  >
+    <button
+      class="collapse-button"
+      type="button"
+      :aria-label="isCollapsed ? '展开导航' : '收起导航'"
+      @click="toggleCollapse"
+    >
+      <el-icon><ArrowRightBold v-if="isCollapsed" /><ArrowLeftBold v-else /></el-icon>
+    </button>
+    <el-menu :default-active="active" router :collapse="isCollapsed" :collapse-transition="false">
+      <el-menu-item v-for="menu in visibleMenus" :key="menu.path" :index="menu.path">
+        <el-icon><component :is="menu.icon" /></el-icon>
+        <span>{{ menu.label }}</span>
+      </el-menu-item>
+    </el-menu>
+  </el-aside>
 </template>
 
 <style scoped>
 .sidebar {
   position: sticky;
-  top: 64px;
-  width: 220px;
-  height: calc(100vh - 64px);
-  flex: 0 0 220px;
-  border-right: 1px solid #e5e9df;
+  top: 60px;
+  height: calc(100vh - 60px);
+  overflow: hidden;
+  border-right: 1px solid var(--el-border-color-light);
   background: #fff;
+  transition: width 0.3s ease;
 }
-nav {
-  display: grid;
-  gap: 6px;
-  padding: 20px 12px;
+
+.el-menu {
+  height: 100%;
+  border-right: 0;
 }
-a {
+
+.el-menu-item {
+  color: var(--ink-muted);
+}
+
+.el-menu-item.is-active {
+  background: transparent;
+  color: var(--el-color-primary);
+}
+
+.el-menu-item .el-icon {
+  color: inherit;
+}
+
+.collapse-button {
+  position: absolute;
+  z-index: 10;
+  top: 20px;
+  right: -12px;
   display: flex;
+  width: 30px;
+  height: 30px;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  color: #646b60;
-  text-decoration: none;
-  transition: 0.16s ease;
+  justify-content: center;
+  border: 1px solid var(--el-border-color);
+  border-radius: 50%;
+  background: #fff;
+  color: var(--ink-muted);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
-a:hover {
-  background: #f5f7f1;
-  color: #294d17;
+
+.collapse-button:hover {
+  border-color: var(--el-border-color-dark);
+  background: var(--el-fill-color-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
-a.active {
-  background: #edf4e7;
-  color: #315b1c;
-  font-weight: 700;
+
+.collapse-button:focus,
+.collapse-button:focus-visible {
+  outline: none;
 }
+
+.sidebar.is-collapsed .collapse-button {
+  right: -12px;
+}
+
 @media (max-width: 760px) {
   .sidebar {
     position: fixed;
@@ -91,24 +149,41 @@ a.active {
     right: 0;
     bottom: 0;
     left: 0;
-    width: auto;
-    height: 68px;
-    border-top: 1px solid #e5e9df;
+    width: 100% !important;
+    height: 70px;
+    border-top: 1px solid var(--el-border-color-lighter);
     border-right: 0;
   }
-  nav {
+
+  .el-menu {
     display: flex;
+    width: 100% !important;
     height: 100%;
-    justify-content: space-around;
-    padding: 6px;
+    padding: 5px 6px;
     overflow-x: auto;
   }
-  a {
-    min-width: 62px;
+
+  .el-menu-item {
+    min-width: 68px;
+    height: 60px;
     flex-direction: column;
-    gap: 2px;
-    padding: 6px;
+    justify-content: center;
+    gap: 3px;
+    margin: 0 2px;
+    padding: 5px 10px;
     font-size: 11px;
+  }
+
+  .el-menu-item.is-active {
+    background: var(--el-color-primary-light-9);
+  }
+
+  .el-menu-item .el-icon {
+    margin-right: 0;
+  }
+
+  .collapse-button {
+    display: none;
   }
 }
 </style>

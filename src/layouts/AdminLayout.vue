@@ -4,29 +4,31 @@ import AdminSidebar from '@/components/admin/AdminSidebar.vue'
 </script>
 
 <template>
-  <div class="admin-shell">
+  <el-container class="admin-shell" direction="vertical">
     <AdminHeader />
-    <div class="admin-body">
+    <el-container class="admin-body">
       <AdminSidebar />
-      <main class="admin-content"><RouterView /></main>
-    </div>
-  </div>
+      <el-main class="admin-content"><RouterView /></el-main>
+    </el-container>
+  </el-container>
 </template>
 
 <style scoped>
 .admin-shell {
   min-height: 100vh;
-  background: #f4f6f1;
+  background: var(--surface-page);
 }
+
 .admin-body {
-  display: flex;
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 60px);
 }
+
 .admin-content {
   width: 100%;
   min-width: 0;
   padding: 28px;
 }
+
 @media (max-width: 760px) {
   .admin-content {
     padding: 18px 14px 84px;

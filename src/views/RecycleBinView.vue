@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 import {
   emptyRecycleBin,
   listRecycleBin,
@@ -32,6 +33,17 @@ async function load(): Promise<void> {
 }
 function applyFilters(): void {
   query.pageNum = 1
+  void load()
+}
+function reset(): void {
+  Object.assign(query, { keyword: '', pageNum: 1, pageSize: 20 })
+  void load()
+}
+function handlePageSizeChange(): void {
+  query.pageNum = 1
+  void load()
+}
+function handleCurrentPageChange(): void {
   void load()
 }
 function showResult(result: BatchPurgeResult): void {
@@ -123,10 +135,11 @@ onMounted(load)
         clearable
         placeholder="搜索回收站文件"
         @keyup.enter="applyFilters"
-      /><el-button @click="applyFilters">查询</el-button>
+      /><el-button type="primary" :icon="Search" @click="applyFilters">查询</el-button
+      ><el-button @click="reset">重置</el-button>
     </div>
     <el-card class="content-card"
-      ><el-table v-loading="loading" :data="rows" @selection-change="selected = $event"
+      ><el-table v-loading="loading" :data="rows" stripe @selection-change="selected = $event"
         ><el-table-column type="selection" width="46" /><el-table-column
           label="文件"
           min-width="240"
@@ -148,19 +161,21 @@ onMounted(load)
           width="130"
         /><el-table-column label="操作" width="150" fixed="right"
           ><template #default="{ row }"
-            ><el-button
-              v-permission="BUTTON_PERMISSIONS.RECYCLE_RESTORE"
-              link
-              type="primary"
-              @click="restore(row)"
-              >还原</el-button
-            ><el-button
-              v-permission="BUTTON_PERMISSIONS.RECYCLE_PURGE"
-              link
-              type="danger"
-              @click="purgeOne(row)"
-              >彻底删除</el-button
-            ></template
+            ><div class="table-actions">
+              <el-button
+                v-permission="BUTTON_PERMISSIONS.RECYCLE_RESTORE"
+                type="primary"
+                size="small"
+                @click="restore(row)"
+                >还原</el-button
+              ><el-button
+                v-permission="BUTTON_PERMISSIONS.RECYCLE_PURGE"
+                type="danger"
+                size="small"
+                @click="purgeOne(row)"
+                >彻底删除</el-button
+              >
+            </div></template
           ></el-table-column
         ></el-table
       >
@@ -168,9 +183,12 @@ onMounted(load)
         <el-pagination
           v-model:current-page="query.pageNum"
           v-model:page-size="query.pageSize"
-          layout="total, prev, pager, next"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :pager-count="7"
           :total="total"
-          @change="load"
+          @size-change="handlePageSizeChange"
+          @current-change="handleCurrentPageChange"
         /></div
     ></el-card>
   </section>
@@ -184,10 +202,5 @@ onMounted(load)
 }
 .tag {
   margin-right: 4px;
-}
-.pagination {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 18px;
 }
 </style>

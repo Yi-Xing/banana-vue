@@ -84,6 +84,13 @@ function applyFilters(): void {
   query.pageNum = 1
   void load()
 }
+function handlePageSizeChange(): void {
+  query.pageNum = 1
+  void load()
+}
+function handleCurrentPageChange(): void {
+  void load()
+}
 function fileChanged(file: UploadFile): void {
   selectedFile.value = file.raw || null
   if (file.raw && !uploadForm.displayName) uploadForm.displayName = file.name
@@ -181,7 +188,11 @@ async function download(row: FileInfo): Promise<void> {
     ElMessage.error(e instanceof Error ? e.message : '下载失败')
   }
 }
+function canPreview(row: FileInfo): boolean {
+  return row.status === 2 && (row.fileType === 1 || row.mimeType === 'application/pdf')
+}
 function preview(row: FileInfo): void {
+  if (!canPreview(row)) return
   previewFile.value = row
   previewVisible.value = true
 }
@@ -245,16 +256,23 @@ onMounted(init)
           :key="item.id"
           :label="item.name"
           :value="item.id" /></el-select
-      ><el-button @click="applyFilters">筛选</el-button
-      ><el-button link @click="reset">重置</el-button>
+      ><el-button type="primary" :icon="Search" @click="applyFilters">筛选</el-button
+      ><el-button @click="reset">重置</el-button>
     </div>
     <el-card class="content-card"
-      ><el-table v-loading="loading" :data="rows"
-        ><el-table-column label="文件" min-width="230"
+      ><el-table v-loading="loading" :data="rows" stripe
+        ><el-table-column label="文件名" min-width="230"
           ><template #default="{ row }"
             ><div class="file-name">
-              <b>{{ row.displayName }}</b
-              ><small>{{ row.originalName }}</small>
+              <el-button
+                v-if="canPreview(row)"
+                class="file-name-button"
+                type="primary"
+                link
+                title="点击预览"
+                @click="preview(row)"
+                >{{ row.displayName }}</el-button
+              ><b v-else>{{ row.displayName }}</b>
             </div></template
           ></el-table-column
         ><el-table-column label="类型 / 大小" width="135"
@@ -288,31 +306,33 @@ onMounted(init)
           width="230"
           fixed="right"
           ><template #default="{ row }"
-            ><el-button
-              v-if="row.status === 2 && (row.fileType === 1 || row.mimeType === 'application/pdf')"
-              link
-              @click="preview(row)"
-              >预览</el-button
-            ><el-button v-if="row.status === 2" link @click="download(row)">下载</el-button
-            ><el-button
-              v-if="row.status === 2"
-              v-permission="BUTTON_PERMISSIONS.FILE_UPDATE"
-              link
-              type="primary"
-              @click="openEdit(row)"
-              >编辑</el-button
-            ><el-button
-              v-if="row.status === 2"
-              v-permission="BUTTON_PERMISSIONS.FILE_DELETE"
-              link
-              type="danger"
-              @click="recycle(row)"
-              >删除</el-button
-            ><el-button v-if="row.status === 3" link type="danger" @click="removeFailed(row)"
-              >删记录</el-button
-            ><el-button v-if="row.status === 6" link type="warning" @click="retry(row)"
-              >重试删除</el-button
-            ></template
+            ><div class="table-actions">
+              <el-button v-if="row.status === 2" type="success" size="small" @click="download(row)"
+                >下载</el-button
+              ><el-button
+                v-if="row.status === 2"
+                v-permission="BUTTON_PERMISSIONS.FILE_UPDATE"
+                type="primary"
+                size="small"
+                @click="openEdit(row)"
+                >编辑</el-button
+              ><el-button
+                v-if="row.status === 2"
+                v-permission="BUTTON_PERMISSIONS.FILE_DELETE"
+                type="danger"
+                size="small"
+                @click="recycle(row)"
+                >删除</el-button
+              ><el-button
+                v-if="row.status === 3"
+                type="danger"
+                size="small"
+                @click="removeFailed(row)"
+                >删记录</el-button
+              ><el-button v-if="row.status === 6" type="warning" size="small" @click="retry(row)"
+                >重试删除</el-button
+              >
+            </div></template
           ></el-table-column
         ></el-table
       >
@@ -320,9 +340,12 @@ onMounted(init)
         <el-pagination
           v-model:current-page="query.pageNum"
           v-model:page-size="query.pageSize"
-          layout="total, sizes, prev, pager, next"
+          :page-sizes="[10, 20, 50, 100]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :pager-count="7"
           :total="total"
-          @change="load"
+          @size-change="handlePageSizeChange"
+          @current-change="handleCurrentPageChange"
         /></div
     ></el-card>
     <el-dialog v-model="uploadVisible" title="上传文件" width="560px" align-center
@@ -385,21 +408,34 @@ onMounted(init)
   width: 175px;
 }
 .file-name {
-  display: grid;
-  gap: 4px;
+  min-width: 0;
 }
-.file-name small,
+.file-name b {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-name-button {
+  display: flex;
+  max-width: 100%;
+  height: auto;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.file-name-button :deep(span) {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .muted {
   color: #969c92;
   font-size: 12px;
 }
 .tag {
   margin: 2px 4px 2px 0;
-}
-.pagination {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 18px;
 }
 .el-form :deep(.el-select),
 .el-form :deep(.el-upload),
@@ -409,6 +445,6 @@ onMounted(init)
 .upload-icon {
   margin-bottom: 8px;
   font-size: 34px;
-  color: #56833c;
+  color: var(--brand);
 }
 </style>

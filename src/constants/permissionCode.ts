@@ -1,5 +1,5 @@
 export const PAGE_PERMISSIONS = {
-  DASHBOARD: 'dashboard.page',
+  ADMIN_DASHBOARD: 'admin.dashboard.page',
   ADMIN_CATEGORY: 'admin.category.page',
   ADMIN_FILE: 'admin.file.page',
   ADMIN_RECYCLE: 'admin.recycle.page',

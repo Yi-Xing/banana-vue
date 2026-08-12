@@ -1,12 +1,15 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-import { getCurrentPermission } from '@/api/permission'
+import { getCurrentUser } from '@/api/user'
 import type { ButtonPermission, PagePermission } from '@/constants/permissionCode'
+import type { CurrentUser } from '@/types/user'
 
 export const usePermissionStore = defineStore('permission', () => {
   const pageCodeSet = ref<Set<string>>(new Set())
   const buttonCodeSet = ref<Set<string>>(new Set())
+  const currentUser = ref<CurrentUser | null>(null)
+  const hasLoadedCurrentUser = ref(false)
   const userPermissionVersion = ref(0)
   const systemPermissionVersion = ref(0)
   let loadingPromise: Promise<void> | null = null
@@ -15,11 +18,13 @@ export const usePermissionStore = defineStore('permission', () => {
     if (loadingPromise) return loadingPromise
 
     loadingPromise = (async () => {
-      const permission = await getCurrentPermission(accessToken)
-      pageCodeSet.value = new Set(permission.pageCodeList)
-      buttonCodeSet.value = new Set(permission.buttonCodeList)
-      userPermissionVersion.value = permission.userPermissionVersion
-      systemPermissionVersion.value = permission.systemPermissionVersion
+      const user = await getCurrentUser(accessToken)
+      currentUser.value = user
+      pageCodeSet.value = new Set(user.pageCodeList)
+      buttonCodeSet.value = new Set(user.buttonCodeList)
+      userPermissionVersion.value = user.userPermissionVersion
+      systemPermissionVersion.value = user.systemPermissionVersion
+      hasLoadedCurrentUser.value = true
     })()
 
     try {
@@ -40,6 +45,8 @@ export const usePermissionStore = defineStore('permission', () => {
   function clear(): void {
     pageCodeSet.value = new Set()
     buttonCodeSet.value = new Set()
+    currentUser.value = null
+    hasLoadedCurrentUser.value = false
     userPermissionVersion.value = 0
     systemPermissionVersion.value = 0
   }
@@ -47,6 +54,8 @@ export const usePermissionStore = defineStore('permission', () => {
   return {
     pageCodeSet,
     buttonCodeSet,
+    currentUser,
+    hasLoadedCurrentUser,
     userPermissionVersion,
     systemPermissionVersion,
     refresh,

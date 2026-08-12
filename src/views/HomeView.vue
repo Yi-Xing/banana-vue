@@ -146,7 +146,7 @@ const projectTree = [
 }
 
 .eyebrow {
-  color: var(--leaf);
+  color: var(--brand);
   font-family: var(--font-functional);
   font-size: 12px;
   font-weight: 800;
@@ -168,7 +168,7 @@ const projectTree = [
 
 .hero h1 span {
   position: relative;
-  color: var(--leaf);
+  color: var(--brand);
   white-space: nowrap;
 }
 
@@ -300,7 +300,7 @@ const projectTree = [
 .orbit-small {
   width: min(33vw, 410px);
   height: min(33vw, 410px);
-  border-top-color: var(--leaf);
+  border-top-color: var(--brand);
   border-top-width: 2px;
   transform: rotate(34deg);
 }

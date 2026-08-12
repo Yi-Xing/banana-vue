@@ -12,16 +12,17 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     { path: '/', name: 'public-home', component: () => import('@/views/PublicHomeView.vue') },
+    { path: '/workspace', redirect: '/admin/dashboard' },
     {
       path: '/',
       component: AdminLayout,
       meta: { requiresAuth: true },
       children: [
         {
-          path: 'workspace',
-          name: 'workspace',
+          path: 'admin/dashboard',
+          name: 'dashboard',
           component: () => import('@/views/DashboardView.vue'),
-          meta: { permission: PAGE_PERMISSIONS.DASHBOARD },
+          meta: { permission: PAGE_PERMISSIONS.ADMIN_DASHBOARD },
         },
         {
           path: 'admin/categories',
@@ -79,17 +80,19 @@ router.beforeEach(async (to) => {
     return false
   }
   const permissionStore = usePermissionStore()
-  try {
-    await permissionStore.refresh(accessToken)
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 401) {
-      authStore.clearSession()
-      permissionStore.clear()
-      beginSsoLogin(to.fullPath)
+  if (!permissionStore.hasLoadedCurrentUser) {
+    try {
+      await permissionStore.refresh(accessToken)
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        authStore.clearSession()
+        permissionStore.clear()
+        beginSsoLogin(to.fullPath)
+        return false
+      }
+      ElMessage.error(error instanceof Error ? error.message : '获取权限失败')
       return false
     }
-    ElMessage.error(error instanceof Error ? error.message : '获取权限失败')
-    return false
   }
   const required = to.meta.permission
   if (required && !permissionStore.hasPagePermission(required)) return { name: 'forbidden' }
