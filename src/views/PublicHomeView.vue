@@ -21,7 +21,8 @@ import bananaLogo from '@/assets/banana-logo.webp'
         <p class="eyebrow">Public home · 无需登录</p>
         <h1 id="public-home-title">文件能力，<br /><span>从这里开始。</span></h1>
         <p class="description">
-          这是 Banana 的公开首页，任何人都可以直接访问。进入工作台后，系统会通过用户中心完成登录，并根据当前用户的页面、按钮和接口权限提供对应能力。
+          这是 Banana
+          的公开首页，任何人都可以直接访问。进入工作台后，系统会通过用户中心完成登录，并根据当前用户的页面、按钮和接口权限提供对应能力。
         </p>
         <div class="actions">
           <RouterLink class="primary-action" to="/workspace">

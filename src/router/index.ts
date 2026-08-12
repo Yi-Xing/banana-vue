@@ -6,26 +6,54 @@ import { PAGE_PERMISSIONS } from '@/constants/permissionCode'
 import { beginSsoLogin } from '@/services/auth'
 import { useAuthStore } from '@/stores/auth'
 import { usePermissionStore } from '@/stores/permission'
+import AdminLayout from '@/layouts/AdminLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    { path: '/', name: 'public-home', component: () => import('@/views/PublicHomeView.vue') },
     {
       path: '/',
-      name: 'public-home',
-      component: () => import('@/views/PublicHomeView.vue'),
-    },
-    {
-      path: '/workspace',
-      name: 'workspace',
-      component: () => import('@/views/HomeView.vue'),
-      meta: { requiresAuth: true, permission: PAGE_PERMISSIONS.HOME },
-    },
-    {
-      path: '/admin/oss',
-      name: 'admin-oss',
-      component: () => import('@/views/OssManageView.vue'),
-      meta: { requiresAuth: true, permission: PAGE_PERMISSIONS.ADMIN_OSS },
+      component: AdminLayout,
+      meta: { requiresAuth: true },
+      children: [
+        {
+          path: 'workspace',
+          name: 'workspace',
+          component: () => import('@/views/DashboardView.vue'),
+          meta: { permission: PAGE_PERMISSIONS.DASHBOARD },
+        },
+        {
+          path: 'admin/categories',
+          name: 'categories',
+          component: () => import('@/views/CategoryManageView.vue'),
+          meta: { permission: PAGE_PERMISSIONS.ADMIN_CATEGORY },
+        },
+        {
+          path: 'admin/files',
+          name: 'files',
+          component: () => import('@/views/FileManageView.vue'),
+          meta: { permission: PAGE_PERMISSIONS.ADMIN_FILE },
+        },
+        {
+          path: 'admin/images',
+          name: 'images',
+          component: () => import('@/views/ImageView.vue'),
+          meta: { permission: PAGE_PERMISSIONS.ADMIN_IMAGE },
+        },
+        {
+          path: 'admin/recycle-bin',
+          name: 'recycle-bin',
+          component: () => import('@/views/RecycleBinView.vue'),
+          meta: { permission: PAGE_PERMISSIONS.ADMIN_RECYCLE },
+        },
+        {
+          path: 'admin/oss',
+          name: 'oss',
+          component: () => import('@/views/OssManageView.vue'),
+          meta: { permission: PAGE_PERMISSIONS.ADMIN_OSS },
+        },
+      ],
     },
     {
       path: '/sso/callback',
@@ -38,26 +66,18 @@ const router = createRouter({
       component: () => import('@/views/ForbiddenView.vue'),
       meta: { requiresAuth: true },
     },
+    { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
-  scrollBehavior: (to) => {
-    if (to.hash) {
-      return { el: to.hash, top: 72 }
-    }
-
-    return { top: 0 }
-  },
 })
 
 router.beforeEach(async (to) => {
   if (!to.meta.requiresAuth) return true
-
   const authStore = useAuthStore()
   const accessToken = authStore.getValidAccessToken()
   if (!accessToken) {
     beginSsoLogin(to.fullPath)
     return false
   }
-
   const permissionStore = usePermissionStore()
   try {
     await permissionStore.refresh(accessToken)
@@ -71,12 +91,8 @@ router.beforeEach(async (to) => {
     ElMessage.error(error instanceof Error ? error.message : '获取权限失败')
     return false
   }
-
-  const requiredPermission = to.meta.permission
-  if (requiredPermission && !permissionStore.hasPagePermission(requiredPermission)) {
-    return to.name === 'forbidden' ? true : { name: 'forbidden' }
-  }
-
+  const required = to.meta.permission
+  if (required && !permissionStore.hasPagePermission(required)) return { name: 'forbidden' }
   return true
 })
 
