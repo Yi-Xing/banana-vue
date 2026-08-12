@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { createOss, deleteOss, listOss, testOss, testSavedOss, updateOss } from '@/api/oss'
 import { BUTTON_PERMISSIONS } from '@/constants/permissionCode'
@@ -11,6 +11,12 @@ import {
 } from '@/utils/businessCode'
 import { confirmAction } from '@/utils/confirm'
 
+const OSS_TYPE = {
+  LOCAL: 1,
+  ALIYUN: 2,
+  QINIU: 3,
+  S3: 4,
+} as const
 const rows = ref<OssConfig[]>([]),
   loading = ref(false),
   visible = ref(false),
@@ -20,7 +26,7 @@ const rows = ref<OssConfig[]>([]),
 const emptyForm = (): OssPayload => ({
   name: '',
   code: '',
-  type: 1,
+  type: OSS_TYPE.LOCAL,
   endpoint: '',
   region: '',
   bucket: '',
@@ -28,18 +34,31 @@ const emptyForm = (): OssPayload => ({
   secretKey: '',
   pathPrefix: '',
   publicDomain: '',
-  accessMode: 2,
+  accessMode: 1,
   state: 1,
   remark: '',
 })
 const form = reactive<OssPayload>(emptyForm())
 const formRef = ref<FormInstance>()
+const isLocalStorage = computed(() => form.type === OSS_TYPE.LOCAL)
 const formRules: FormRules = {
   code: [
     { required: true, message: '请输入 OSS Code', trigger: 'blur' },
     { pattern: BUSINESS_CODE_PATTERN, message: BUSINESS_CODE_MESSAGE, trigger: 'blur' },
   ],
 }
+
+watch(
+  () => form.type,
+  (type) => {
+    if (type !== OSS_TYPE.LOCAL) return
+    form.endpoint = ''
+    form.region = ''
+    form.accessMode = 1
+    form.accessKey = ''
+    form.secretKey = ''
+  },
+)
 
 async function load(): Promise<void> {
   loading.value = true
@@ -130,7 +149,7 @@ onMounted(load)
       <div>
         <p>Storage</p>
         <h1>OSS 管理</h1>
-        <span>统一配置阿里云、七牛云和 S3 兼容存储；code 为 default 时作为默认 OSS。</span>
+        <span>统一配置本地、阿里云、七牛云和 S3 兼容存储；code 为 default 时作为默认 OSS。</span>
       </div>
       <el-button v-permission="BUTTON_PERMISSIONS.OSS_ADD" type="primary" @click="openCreate"
         >新增 OSS</el-button
@@ -144,7 +163,7 @@ onMounted(load)
             <div class="muted">{{ row.code }}</div></template
           ></el-table-column
         ><el-table-column prop="typeLabel" label="类型" width="120" /><el-table-column
-          label="Bucket"
+          label="Bucket / 目录"
           min-width="170"
           ><template #default="{ row }"
             >{{ row.bucket }}
@@ -168,7 +187,7 @@ onMounted(load)
           ></el-table-column
         ><el-table-column label="凭据" width="130"
           ><template #default="{ row }">{{
-            row.accessKeyMasked || '未配置'
+            row.type === OSS_TYPE.LOCAL ? '无需配置' : row.accessKeyMasked || '未配置'
           }}</template></el-table-column
         ><el-table-column label="操作" width="205" fixed="right"
           ><template #default="{ row }"
@@ -210,37 +229,48 @@ onMounted(load)
             <div class="hint">RPC 外部系统通过 code 定位；值为 default 时作为默认 OSS</div></el-form-item
           ><el-form-item label="类型"
             ><el-select v-model="form.type"
-              ><el-option label="阿里云" :value="1" /><el-option
+              ><el-option label="本地存储" :value="OSS_TYPE.LOCAL" /><el-option
+                label="阿里云"
+                :value="OSS_TYPE.ALIYUN" /><el-option
                 label="七牛云"
-                :value="2" /><el-option label="S3 兼容" :value="3" /></el-select></el-form-item
+                :value="OSS_TYPE.QINIU" /><el-option
+                label="S3 兼容"
+                :value="OSS_TYPE.S3" /></el-select></el-form-item
           ><el-form-item label="访问模式"
-            ><el-select v-model="form.accessMode"
+            ><el-select v-model="form.accessMode" :disabled="isLocalStorage"
               ><el-option label="公开" :value="1" /><el-option
                 label="私有"
                 :value="2" /></el-select></el-form-item
-          ><el-form-item label="Endpoint"
+          ><el-form-item v-if="!isLocalStorage" label="Endpoint"
             ><el-input v-model="form.endpoint" placeholder="服务访问端点" /></el-form-item
-          ><el-form-item label="Region"
+          ><el-form-item v-if="!isLocalStorage" label="Region"
             ><el-input v-model="form.region" placeholder="存储地域" /></el-form-item
-          ><el-form-item label="Bucket"
-            ><el-input v-model="form.bucket" placeholder="存储空间名称" /></el-form-item
+          ><el-form-item :label="isLocalStorage ? '本地目录名' : 'Bucket'"
+            ><el-input
+              v-model="form.bucket"
+              :placeholder="isLocalStorage ? '例如 files，仅作为本地根目录下的子目录' : '存储空间名称'"
+            />
+            <div v-if="isLocalStorage" class="hint">
+              仅支持字母、数字、点、下划线和中划线，不可填写服务器绝对路径
+            </div></el-form-item
           ><el-form-item label="Path Prefix"
             ><el-input v-model="form.pathPrefix" placeholder="可选，对象键统一前缀" /></el-form-item
           ><el-form-item label="Public Domain"
             ><el-input
               v-model="form.publicDomain"
-              placeholder="公开域名或七牛下载域名" /></el-form-item
+              :placeholder="isLocalStorage ? '可选，留空使用 Banana 本地文件访问路径' : '公开域名或七牛下载域名'"
+            /></el-form-item
           ><el-form-item label="状态"
             ><el-select v-model="form.state"
               ><el-option label="启用" :value="1" /><el-option
                 label="禁用"
                 :value="2" /></el-select></el-form-item
-          ><el-form-item label="AccessKey"
+          ><el-form-item v-if="!isLocalStorage" label="AccessKey"
             ><el-input
               v-model="form.accessKey"
               :placeholder="editingId ? '留空保持不变' : ''"
               autocomplete="off" /></el-form-item
-          ><el-form-item label="SecretKey"
+          ><el-form-item v-if="!isLocalStorage" label="SecretKey"
             ><el-input
               v-model="form.secretKey"
               type="password"

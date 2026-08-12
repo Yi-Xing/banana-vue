@@ -23,6 +23,10 @@ export default defineConfig(({ mode }) => {
           target: env.BANANA_API_PROXY_TARGET || 'http://banana.fblue.top:8081',
           changeOrigin: true,
         },
+        '/local-files': {
+          target: env.BANANA_API_PROXY_TARGET || 'http://banana.fblue.top:8081',
+          changeOrigin: true,
+        },
       },
     },
   }
