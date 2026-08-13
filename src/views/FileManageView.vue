@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { ElMessage, type UploadFile } from 'element-plus'
+import {
+  ElMessage,
+  genFileId,
+  type UploadFile,
+  type UploadInstance,
+  type UploadProps,
+  type UploadRawFile,
+} from 'element-plus'
 import { Upload, Search } from '@element-plus/icons-vue'
 import { listCategories } from '@/api/category'
 import {
@@ -8,6 +15,7 @@ import {
   downloadFileBlob,
   listFiles,
   recycleFile,
+  recycleFiles,
   retryDeleteFile,
   updateFile,
   uploadFile,
@@ -23,7 +31,9 @@ const loading = ref(false),
   rows = ref<FileInfo[]>([]),
   total = ref(0),
   categories = ref<Category[]>([]),
-  ossList = ref<OssConfig[]>([])
+  ossList = ref<OssConfig[]>([]),
+  selected = ref<FileInfo[]>([]),
+  recyclingSelected = ref(false)
 const query = reactive<FileQuery>({
   keyword: '',
   categoryIds: [],
@@ -35,6 +45,7 @@ const query = reactive<FileQuery>({
 const uploadVisible = ref(false),
   uploading = ref(false),
   uploadProgress = ref(0),
+  uploadRef = ref<UploadInstance>(),
   selectedFile = ref<File | null>(null)
 const uploadForm = reactive({
   displayName: '',
@@ -55,6 +66,7 @@ async function load(): Promise<void> {
     const page = await listFiles(query)
     rows.value = page.dataList
     total.value = page.total
+    selected.value = []
   } catch (e) {
     ElMessage.error(e instanceof Error ? e.message : '加载失败')
   } finally {
@@ -93,9 +105,17 @@ function handleCurrentPageChange(): void {
 }
 function fileChanged(file: UploadFile): void {
   selectedFile.value = file.raw || null
-  if (file.raw && !uploadForm.displayName) uploadForm.displayName = file.name
+  if (file.raw) uploadForm.displayName = file.name
+}
+const replaceFile: UploadProps['onExceed'] = (files) => {
+  const file = files[0] as UploadRawFile | undefined
+  if (!file) return
+  uploadRef.value?.clearFiles()
+  file.uid = genFileId()
+  uploadRef.value?.handleStart(file)
 }
 function openUpload(): void {
+  uploadRef.value?.clearFiles()
   selectedFile.value = null
   uploadProgress.value = 0
   Object.assign(uploadForm, { displayName: '', categoryIds: [], ossId: undefined, remark: '' })
@@ -163,6 +183,32 @@ async function recycle(row: FileInfo): Promise<void> {
     ElMessage.error(e instanceof Error ? e.message : '操作失败')
   }
 }
+function canSelect(row: FileInfo): boolean {
+  return row.status === 2
+}
+async function recycleSelected(): Promise<void> {
+  if (!selected.value.length) return
+  const selectedCount = selected.value.length
+  if (
+    !(await confirmAction(`将选中的 ${selectedCount} 个文件移入回收站？`, '批量删除', {
+      type: 'warning',
+    }))
+  )
+    return
+  recyclingSelected.value = true
+  try {
+    await recycleFiles(selected.value.map((item) => item.id))
+    ElMessage.success(`已将 ${selectedCount} 个文件移入回收站`)
+    const remainingTotal = total.value - selectedCount
+    if (query.pageNum > 1 && remainingTotal <= (query.pageNum - 1) * query.pageSize)
+      query.pageNum -= 1
+    await load()
+  } catch (e) {
+    ElMessage.error(e instanceof Error ? e.message : '批量删除失败')
+  } finally {
+    recyclingSelected.value = false
+  }
+}
 async function removeFailed(row: FileInfo): Promise<void> {
   try {
     await deleteFailedRecord(row.id)
@@ -214,17 +260,26 @@ onMounted(init)
   <section class="management-page">
     <header class="page-heading">
       <div>
-        <p>Files</p>
         <h1>文件管理</h1>
-        <span>单文件最大 100MB，上传失败记录会保留以便定位和清理。</span>
+        <span class="heading-meta-text">单文件上限 100MB</span>
       </div>
-      <el-button
-        v-permission="BUTTON_PERMISSIONS.FILE_UPLOAD"
-        type="primary"
-        :icon="Upload"
-        @click="openUpload"
-        >上传文件</el-button
-      >
+      <div>
+        <el-button
+          v-permission="BUTTON_PERMISSIONS.FILE_DELETE"
+          type="danger"
+          plain
+          :disabled="!selected.length"
+          :loading="recyclingSelected"
+          @click="recycleSelected"
+          >删除选中</el-button
+        ><el-button
+          v-permission="BUTTON_PERMISSIONS.FILE_UPLOAD"
+          type="primary"
+          :icon="Upload"
+          @click="openUpload"
+          >上传文件</el-button
+        >
+      </div>
     </header>
     <div class="toolbar">
       <el-input v-model="query.keyword" class="grow" clearable placeholder="搜索文件名称"
@@ -260,8 +315,10 @@ onMounted(init)
       ><el-button @click="reset">重置</el-button>
     </div>
     <el-card class="content-card"
-      ><el-table v-loading="loading" :data="rows" stripe
-        ><el-table-column label="文件名" min-width="230"
+      ><el-table v-loading="loading" :data="rows" stripe @selection-change="selected = $event"
+        ><el-table-column type="selection" width="46" :selectable="canSelect" /><el-table-column
+          label="文件名"
+          min-width="230"
           ><template #default="{ row }"
             ><div class="file-name">
               <el-button
@@ -282,9 +339,13 @@ onMounted(init)
           ></el-table-column
         ><el-table-column label="分类" min-width="160"
           ><template #default="{ row }"
-            ><el-tag v-for="item in row.categories" :key="item.id" class="tag" size="small">{{
-              item.name
-            }}</el-tag></template
+            ><el-tag
+              v-for="item in row.categories"
+              :key="item.id"
+              class="category-tag"
+              size="small"
+              >{{ item.name }}</el-tag
+            ></template
           ></el-table-column
         ><el-table-column label="OSS" width="125"
           ><template #default="{ row }">{{ row.oss.name }}</template></el-table-column
@@ -351,10 +412,20 @@ onMounted(init)
     <el-dialog v-model="uploadVisible" title="上传文件" width="560px" align-center
       ><el-form label-position="top"
         ><el-form-item label="选择文件"
-          ><el-upload drag :auto-upload="false" :limit="1" :on-change="fileChanged"
+          ><el-upload
+            ref="uploadRef"
+            drag
+            :auto-upload="false"
+            :limit="1"
+            :on-change="fileChanged"
+            :on-exceed="replaceFile"
             ><el-icon class="upload-icon"><Upload /></el-icon>
             <div>拖拽文件到这里，或点击选择</div>
-            <template #tip><span>不超过 100MB</span></template></el-upload
+            <template #tip
+              ><span
+                >单文件不超过 100MB；上传失败后会保留记录，可在列表中定位和清理。</span
+              ></template
+            ></el-upload
           ></el-form-item
         ><el-form-item label="展示名称"
           ><el-input v-model="uploadForm.displayName" maxlength="100" /></el-form-item
@@ -431,10 +502,13 @@ onMounted(init)
   white-space: nowrap;
 }
 .muted {
-  color: #969c92;
+  color: var(--ink-subtle);
   font-size: 12px;
 }
-.tag {
+.category-tag {
+  --el-tag-bg-color: #f3f4f2;
+  --el-tag-border-color: #d8dcd7;
+  --el-tag-text-color: var(--ink-muted);
   margin: 2px 4px 2px 0;
 }
 .el-form :deep(.el-select),

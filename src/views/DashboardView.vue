@@ -26,9 +26,7 @@ onMounted(load)
   <section class="management-page">
     <header class="page-heading">
       <div>
-        <p>Overview</p>
         <h1>文件仪表盘</h1>
-        <span>集中查看文件规模、存储用量和最近上传。</span>
       </div>
     </header>
     <div

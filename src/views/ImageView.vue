@@ -5,7 +5,7 @@ import { Search } from '@element-plus/icons-vue'
 import { listCategories } from '@/api/category'
 import { listImages } from '@/api/image'
 import { getFileAccessUrl } from '@/api/file'
-import FilePreviewDialog from '@/components/file/FilePreviewDialog.vue'
+import ImageDetailDialog from '@/components/file/ImageDetailDialog.vue'
 import type { Category, FileInfo, FileQuery } from '@/types/file'
 import { formatFileSize } from '@/utils/file'
 
@@ -53,6 +53,15 @@ function preview(file: FileInfo): void {
   previewFile.value = file
   previewVisible.value = true
 }
+function handleUpdated(file: FileInfo): void {
+  const index = rows.value.findIndex((item) => item.id === file.id)
+  if (index >= 0) rows.value.splice(index, 1, file)
+  previewFile.value = file
+}
+async function handleDeleted(): Promise<void> {
+  if (rows.value.length === 1 && query.pageNum > 1) query.pageNum -= 1
+  await load()
+}
 function applyFilters(): void {
   query.pageNum = 1
   void load()
@@ -90,9 +99,7 @@ onMounted(async () => {
   <section class="management-page">
     <header class="page-heading">
       <div>
-        <p>Images</p>
         <h1>图片视图</h1>
-        <span>按分类、尺寸和色彩空间筛选已上传图片。</span>
       </div>
     </header>
     <div class="toolbar">
@@ -162,7 +169,13 @@ onMounted(async () => {
         @current-change="handleCurrentPageChange"
       />
     </div>
-    <FilePreviewDialog v-model="previewVisible" :file="previewFile" />
+    <ImageDetailDialog
+      v-model="previewVisible"
+      :file="previewFile"
+      :categories="categories"
+      @updated="handleUpdated"
+      @deleted="handleDeleted"
+    />
   </section>
 </template>
 
@@ -213,7 +226,7 @@ onMounted(async () => {
   white-space: nowrap;
 }
 .image-info span {
-  color: #92998e;
+  color: var(--ink-subtle);
   font-size: 12px;
 }
 </style>

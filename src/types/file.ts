@@ -11,7 +11,7 @@ export interface PageData<T> {
 export interface Category {
   id: number
   name: string
-  code: string
+  code: string | null
   orderNum: number
   state: number
   stateLabel: string
@@ -30,10 +30,16 @@ export interface CategoryPayload {
   remark: string
 }
 
+export interface CategoryQuery {
+  keyword: string
+  pageNum: number
+  pageSize: number
+}
+
 export interface OssConfig {
   id: number
   name: string
-  code: string
+  code: string | null
   type: number
   typeLabel: string
   endpoint: string | null
@@ -71,13 +77,13 @@ export interface OssPayload {
 export interface FileCategorySummary {
   id: number
   name: string
-  code: string
+  code: string | null
 }
 
 export interface FileOssSummary {
   id: number
   name: string
-  code: string
+  code: string | null
   type: number
 }
 

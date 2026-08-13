@@ -43,10 +43,7 @@ const form = reactive<OssPayload>(emptyForm())
 const formRef = ref<FormInstance>()
 const isLocalStorage = computed(() => form.type === OSS_TYPE.LOCAL)
 const formRules: FormRules = {
-  code: [
-    { required: true, message: '请输入 OSS Code', trigger: 'blur' },
-    { pattern: BUSINESS_CODE_PATTERN, message: BUSINESS_CODE_MESSAGE, trigger: 'blur' },
-  ],
+  code: [{ pattern: BUSINESS_CODE_PATTERN, message: BUSINESS_CODE_MESSAGE, trigger: 'blur' }],
 }
 
 watch(
@@ -80,7 +77,7 @@ function openEdit(row: OssConfig): void {
   editingId.value = row.id
   Object.assign(form, {
     name: row.name,
-    code: row.code,
+    code: row.code ?? '',
     type: row.type,
     endpoint: row.endpoint || '',
     region: row.region || '',
@@ -148,9 +145,7 @@ onMounted(load)
   <section class="management-page">
     <header class="page-heading">
       <div>
-        <p>Storage</p>
         <h1>OSS 管理</h1>
-        <span>统一配置本地、阿里云、七牛云和 S3 兼容存储；code 为 default 时作为默认 OSS。</span>
       </div>
       <el-button
         v-permission="BUTTON_PERMISSIONS.OSS_ADD"
@@ -162,10 +157,11 @@ onMounted(load)
     </header>
     <el-card class="content-card"
       ><el-table v-loading="loading" :data="rows" stripe
-        ><el-table-column label="名称 / Code" min-width="190"
+        ><el-table-column label="名称 / Code" width="170"
           ><template #default="{ row }"
-            ><b>{{ row.name }}</b>
-            <div class="muted">{{ row.code }}</div></template
+            ><b>{{ row.name }}</b
+            ><el-tag v-if="row.code === 'default'" class="default-tag" size="small">默认</el-tag>
+            <div class="muted">{{ row.code || '—' }}</div></template
           ></el-table-column
         ><el-table-column prop="typeLabel" label="类型" width="120" /><el-table-column
           label="Bucket / 目录"
@@ -186,15 +182,11 @@ onMounted(load)
               row.stateLabel
             }}</el-tag></template
           ></el-table-column
-        ><el-table-column label="默认" width="75"
-          ><template #default="{ row }"
-            ><el-tag v-if="row.code === 'default'">默认</el-tag><span v-else>—</span></template
-          ></el-table-column
         ><el-table-column label="凭据" width="130"
           ><template #default="{ row }">{{
             row.type === OSS_TYPE.LOCAL ? '无需配置' : row.accessKeyMasked || '未配置'
           }}</template></el-table-column
-        ><el-table-column label="操作" width="205" fixed="right"
+        ><el-table-column label="操作" width="230" fixed="right"
           ><template #default="{ row }"
             ><div class="table-actions">
               <el-button
@@ -234,11 +226,9 @@ onMounted(load)
               v-model="form.code"
               :maxlength="BUSINESS_CODE_MAX_LENGTH"
               show-word-limit
-              placeholder="小写字母、数字、_、-，最长254个字符"
+              placeholder="选填；小写字母、数字、_、-"
             />
-            <div class="hint">
-              RPC 外部系统通过 code 定位；值为 default 时作为默认 OSS
-            </div></el-form-item
+            <div class="hint">值为 default 时作为默认 OSS</div></el-form-item
           ><el-form-item label="类型"
             ><el-select v-model="form.type"
               ><el-option label="本地存储" :value="OSS_TYPE.LOCAL" /><el-option
@@ -309,10 +299,16 @@ onMounted(load)
 </template>
 
 <style scoped>
+.default-tag {
+  --el-tag-bg-color: #f5f2e8;
+  --el-tag-border-color: #ddd5bc;
+  --el-tag-text-color: #625b43;
+  margin-left: 8px;
+}
 .muted,
 .hint {
   margin-top: 4px;
-  color: #969c92;
+  color: var(--ink-subtle);
   font-size: 12px;
 }
 .form-grid {

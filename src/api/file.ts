@@ -66,6 +66,13 @@ export const updateFile = (
 export const recycleFile = (id: number) =>
   apiRequest<void>(`/api/admin/files${buildQuery({ id })}`, { method: 'DELETE' }, '移入回收站失败')
 
+export const recycleFiles = (ids: number[]) =>
+  apiRequest<void>(
+    '/api/admin/files',
+    { method: 'DELETE', body: JSON.stringify({ ids }) },
+    '批量移入回收站失败',
+  )
+
 export const getFileAccessUrl = (id: number) =>
   apiRequest<{ url: string }>(
     `/api/admin/files/access${buildQuery({ id })}`,

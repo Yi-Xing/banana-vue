@@ -1,8 +1,11 @@
 import { apiRequest, buildQuery } from '@/api/request'
-import type { Category, CategoryPayload } from '@/types/file'
+import type { Category, CategoryPayload, CategoryQuery, PageData } from '@/types/file'
 
 export const listCategories = (state?: number) =>
   apiRequest<Category[]>(`/api/admin/categories${buildQuery({ state })}`, {}, '获取分类失败')
+
+export const queryCategories = (query: CategoryQuery) =>
+  apiRequest<PageData<Category>>(`/api/admin/categories${buildQuery(query)}`, {}, '获取分类失败')
 
 export const createCategory = (payload: CategoryPayload) =>
   apiRequest<Category>(

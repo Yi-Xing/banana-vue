@@ -109,9 +109,8 @@ onMounted(load)
   <section class="management-page">
     <header class="page-heading">
       <div>
-        <p>Recycle bin</p>
         <h1>回收站</h1>
-        <span>文件保留 30 天后由系统自动清理，也可以立即彻底删除。</span>
+        <span class="heading-meta-text">保留 30 天</span>
       </div>
       <div>
         <el-button
@@ -151,15 +150,19 @@ onMounted(load)
           ></el-table-column
         ><el-table-column label="分类" min-width="160"
           ><template #default="{ row }"
-            ><el-tag v-for="item in row.categories" :key="item.id" class="tag" size="small">{{
-              item.name
-            }}</el-tag></template
+            ><el-tag
+              v-for="item in row.categories"
+              :key="item.id"
+              class="category-tag"
+              size="small"
+              >{{ item.name }}</el-tag
+            ></template
           ></el-table-column
         ><el-table-column prop="deletedTime" label="删除时间" width="175" /><el-table-column
           prop="oss.name"
           label="OSS"
           width="130"
-        /><el-table-column label="操作" width="150" fixed="right"
+        /><el-table-column label="操作" width="180" fixed="right"
           ><template #default="{ row }"
             ><div class="table-actions">
               <el-button
@@ -197,10 +200,13 @@ onMounted(load)
 <style scoped>
 .muted {
   margin-top: 5px;
-  color: #969c92;
+  color: var(--ink-subtle);
   font-size: 12px;
 }
-.tag {
-  margin-right: 4px;
+.category-tag {
+  --el-tag-bg-color: #f3f4f2;
+  --el-tag-border-color: #d8dcd7;
+  --el-tag-text-color: var(--ink-muted);
+  margin: 2px 4px 2px 0;
 }
 </style>
